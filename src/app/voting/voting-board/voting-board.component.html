@@ -1,0 +1,523 @@
+<mat-card class="mat-card">
+  <mat-toolbar color="primary" fxLayout="row">
+    <span fxFlex>Voting Board</span>
+    <button *ngIf="isVotingState && !submittedVoteId && !submittingVote && !loadingVoteOfCurrentUser" mat-mini-fab
+      color="accent" (click)="submitResult()" matTooltip="Submit my results" matTooltipShowDelay="500">
+      <mat-icon>done_all</mat-icon>
+    </button>
+    <mat-divider vertical class="button-vertical-divider"
+      *ngIf="isVotingState && !submittedVoteId && !submittingVote && isHost"></mat-divider>
+    <button *ngIf="isVotingState && isHost && !submittingVote && !finishingVoting" mat-mini-fab color="accent"
+      (click)="finishVoting()" matTooltip="Finish voting" matTooltipShowDelay="500">
+      <mat-icon>exit_to_app</mat-icon>
+    </button>
+  </mat-toolbar>
+  <mat-card-content>
+    <!-- Idle -->
+    <div *ngIf="isIdleState && isHost" fxLayout="column" fxLayoutAlign="center center">
+      <div fxFlex style="padding: 30px 0px; text-align: center;">
+        <span class="start-voting">Create an issue and start voting!</span>
+        <h3 id="or-divider">OR</h3>
+        <span class="start-voting">Vote without an issue (results will not be saved)!</span>
+      </div>
+    </div>
+
+    <div *ngIf="isIdleState && !isHost" fxLayout="column" fxLayoutAlign="center center">
+      <div fxFlex fxLayout="row" fxLayoutAlign="start start" fxLayoutGap="10px"
+        style="padding: 30px 0px; text-align: center;">
+        <mat-icon>hourglass_bottom_outline</mat-icon>
+        <span class="start-voting">Please wait until the host starts the voting!</span>
+      </div>
+    </div>
+
+    <!-- Voting -->
+    <div *ngIf="(isVotingState && !submittedVoteId && !submittingVote && !loadingVoteOfCurrentUser) || isResultState"
+      fxLayout="column" class="board-content">
+      <div fxLayout="row" fxLayoutAlign="start center">
+        <span class="dimension-header">Social</span>
+        <button mat-icon-button (click)="showSocialInfoOverlay = !showSocialInfoOverlay" cdkOverlayOrigin
+          #triggerSocialOverlay="cdkOverlayOrigin" aria-label="Show information about social dimension">
+          <mat-icon>info_outline</mat-icon>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        [ngClass]="isResultState ? 'result-custom-slider' : 'custom-slider'">
+        <ngx-slider *ngIf="!isResultState && !hideSocialSlider" [(value)]="socialValue"
+          [options]="votingOptions"></ngx-slider>
+        <ngx-slider *ngIf="isResultState" class="result-slider"
+          [ngClass]="{'hide-slider-pointer': socialMedian === undefined}"
+          [(value)]="socialMedian === undefined ? 0 : socialMedian" [options]="socialResultOptions"></ngx-slider>
+        <div fxFlex *ngIf="hideSocialSlider" class="not-sure-text">
+          <mat-icon class="question-mark-icon">question_mark</mat-icon>
+          <span>I'm not sure</span>
+        </div>
+        <mat-divider vertical [ngClass]="isResultState ? 'result-vertical-divider' : 'vertical-divider'"></mat-divider>
+        <div [ngClass]="{'suspend-checkbox': !isResultState}">
+          <mat-checkbox *ngIf="!isResultState; else showSocialQuestionMark" (change)="hideSocialSlider = $event.checked"
+            color="accent" matTooltip="I'm not sure" matTooltipShowDelay="500"></mat-checkbox>
+          <ng-template #showSocialQuestionMark>
+            <div class="not-sure-icon">
+              <mat-icon>question_mark</mat-icon>
+              <div *ngIf="socialNotSureCounter > 0" class="not-sure-counter">
+                <span class="slider-result-counter">{{ socialNotSureCounter }}</span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+
+      <div fxLayout="row" fxLayoutAlign="start center">
+        <span class="dimension-header">Individual</span>
+        <button mat-icon-button (click)="showIndividualInfoOverlay = !showIndividualInfoOverlay" cdkOverlayOrigin
+          #triggerIndividualOverlay="cdkOverlayOrigin" aria-label="Show information about individual dimension">
+          <mat-icon>info_outline</mat-icon>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        [ngClass]="isResultState ? 'result-custom-slider' : 'custom-slider'">
+        <ngx-slider *ngIf="!isResultState && !hideIndividualSlider" [(value)]="individualValue"
+          [options]="votingOptions"></ngx-slider>
+        <ngx-slider *ngIf="isResultState" class="result-slider"
+          [ngClass]="{'hide-slider-pointer': individualMedian === undefined}"
+          [(value)]="individualMedian === undefined ? 0 : individualMedian"
+          [options]="individualResultOptions"></ngx-slider>
+        <div fxFlex *ngIf="hideIndividualSlider" class="not-sure-text">
+          <mat-icon class="question-mark-icon">question_mark</mat-icon>
+          <span>I'm not sure</span>
+        </div>
+        <mat-divider vertical [ngClass]="isResultState ? 'result-vertical-divider' : 'vertical-divider'"></mat-divider>
+        <div [ngClass]="{'suspend-checkbox': !isResultState}">
+          <mat-checkbox *ngIf="!isResultState; else showIndividualQuestionMark"
+            (change)="hideIndividualSlider = $event.checked" color="accent" matTooltip="I'm not sure"
+            matTooltipShowDelay="500"></mat-checkbox>
+          <ng-template #showIndividualQuestionMark>
+            <div class="not-sure-icon">
+              <mat-icon>question_mark</mat-icon>
+              <div *ngIf="individualNotSureCounter > 0" class="not-sure-counter">
+                <span class="slider-result-counter">{{ individualNotSureCounter }}</span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+
+      <div fxLayout="row" fxLayoutAlign="start center">
+        <span class="dimension-header">Environmental</span>
+        <button mat-icon-button (click)="showEnvironmentalInfoOverlay = !showEnvironmentalInfoOverlay" cdkOverlayOrigin
+          #triggerEnvironmentalOverlay="cdkOverlayOrigin" aria-label="Show information about environmental dimension">
+          <mat-icon>info_outline</mat-icon>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        [ngClass]="isResultState ? 'result-custom-slider' : 'custom-slider'">
+        <ngx-slider *ngIf="!isResultState && !hideEnvironmentalSlider" [(value)]="environmentalValue"
+          [options]="votingOptions"></ngx-slider>
+        <ngx-slider *ngIf="isResultState" class="result-slider"
+          [ngClass]="{'hide-slider-pointer': environmentalMedian === undefined}"
+          [(value)]="environmentalMedian === undefined ? 0 : environmentalMedian"
+          [options]="environmentalResultOptions"></ngx-slider>
+        <div fxFlex *ngIf="hideEnvironmentalSlider" class="not-sure-text">
+          <mat-icon class="question-mark-icon">question_mark</mat-icon>
+          <span>I'm not sure</span>
+        </div>
+        <mat-divider vertical [ngClass]="isResultState ? 'result-vertical-divider' : 'vertical-divider'"></mat-divider>
+        <div [ngClass]="{'suspend-checkbox': !isResultState}">
+          <mat-checkbox *ngIf="!isResultState; else showEnvironmentalQuestionMark"
+            (change)="hideEnvironmentalSlider = $event.checked" color="accent" matTooltip="I'm not sure"
+            matTooltipShowDelay="500"></mat-checkbox>
+          <ng-template #showEnvironmentalQuestionMark>
+            <div class="not-sure-icon">
+              <mat-icon>question_mark</mat-icon>
+              <div *ngIf="environmentalNotSureCounter > 0" class="not-sure-counter">
+                <span class="slider-result-counter">{{ environmentalNotSureCounter }}</span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+
+      <div fxLayout="row" fxLayoutAlign="start center">
+        <span class="dimension-header">Economical</span>
+        <button mat-icon-button (click)="showEconomicalInfoOverlay = !showEconomicalInfoOverlay" cdkOverlayOrigin
+          #triggerEconomicalOverlay="cdkOverlayOrigin" aria-label="Show information about economical dimension">
+          <mat-icon>info_outline</mat-icon>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        [ngClass]="isResultState ? 'result-custom-slider' : 'custom-slider'">
+        <ngx-slider *ngIf="!isResultState && !hideEconomicalSlider" [(value)]="economicalValue"
+          [options]="votingOptions"></ngx-slider>
+        <ngx-slider *ngIf="isResultState" class="result-slider"
+          [ngClass]="{'hide-slider-pointer': economicalMedian === undefined}"
+          [(value)]="economicalMedian === undefined ? 0 : economicalMedian"
+          [options]="economicalResultOptions"></ngx-slider>
+        <div fxFlex *ngIf="hideEconomicalSlider" class="not-sure-text">
+          <mat-icon class="question-mark-icon">question_mark</mat-icon>
+          <span>I'm not sure</span>
+        </div>
+        <mat-divider vertical [ngClass]="isResultState ? 'result-vertical-divider' : 'vertical-divider'"></mat-divider>
+        <div [ngClass]="{'suspend-checkbox': !isResultState}">
+          <mat-checkbox *ngIf="!isResultState; else showEconomicalQuestionMark"
+            (change)="hideEconomicalSlider = $event.checked" color="accent" matTooltip="I'm not sure"
+            matTooltipShowDelay="500"></mat-checkbox>
+          <ng-template #showEconomicalQuestionMark>
+            <div class="not-sure-icon">
+              <mat-icon>question_mark</mat-icon>
+              <div *ngIf="economicalNotSureCounter > 0" class="not-sure-counter">
+                <span class="slider-result-counter">{{ economicalNotSureCounter }}</span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+
+      <div fxLayout="row" fxLayoutAlign="start center">
+        <span class="dimension-header">Technical</span>
+        <button mat-icon-button (click)="showTechnicalInfoOverlay = !showTechnicalInfoOverlay" cdkOverlayOrigin
+          #triggerTechnicalOverlay="cdkOverlayOrigin" aria-label="Show information about technical dimension">
+          <mat-icon>info_outline</mat-icon>
+        </button>
+      </div>
+      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="10px"
+        [ngClass]="isResultState ? 'result-custom-slider' : 'custom-slider'">
+        <ngx-slider *ngIf="!isResultState && !hideTechnicalSlider" [(value)]="technicalValue"
+          [options]="votingOptions"></ngx-slider>
+        <ngx-slider *ngIf="isResultState" class="result-slider"
+          [ngClass]="{'hide-slider-pointer': technicalMedian === undefined}"
+          [(value)]="technicalMedian === undefined ? 0 : technicalMedian"
+          [options]="technicalResultOptions"></ngx-slider>
+        <div fxFlex *ngIf="hideTechnicalSlider" class="not-sure-text">
+          <mat-icon class="question-mark-icon">question_mark</mat-icon>
+          <span>I'm not sure</span>
+        </div>
+        <mat-divider vertical [ngClass]="isResultState ? 'result-vertical-divider' : 'vertical-divider'"></mat-divider>
+        <div [ngClass]="{'suspend-checkbox': !isResultState}">
+          <mat-checkbox *ngIf="!isResultState; else showTechnicalQuestionMark"
+            (change)="hideTechnicalSlider = $event.checked" color="accent" matTooltip="I'm not sure"
+            matTooltipShowDelay="500"></mat-checkbox>
+          <ng-template #showTechnicalQuestionMark>
+            <div class="not-sure-icon">
+              <mat-icon>question_mark</mat-icon>
+              <div *ngIf="technicalNotSureCounter > 0" class="not-sure-counter">
+                <span class="slider-result-counter">{{ technicalNotSureCounter }}</span>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Information overlays for dimensions -->
+      <ng-template cdkConnectedOverlay cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+        [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayOrigin]="triggerSocialOverlay"
+        [cdkConnectedOverlayOpen]="showSocialInfoOverlay" (detach)="showSocialInfoOverlay = false"
+        (backdropClick)="showSocialInfoOverlay = false">
+        <mat-card class="overlay-card">
+          <mat-card-content>
+            <span>
+              <span class="sample-topics-text">Sense of Community</span>
+              means the feeling of belonging to an organization, to an area or to a group of like-minded people.
+            </span>
+            <ul>
+              <li>How can the product or service affect a person's sense of belonging to these groups?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+
+            <span>
+              <span class="sample-topics-text">Trust</span>
+              means having a firm belief in the reliability, truth, or ability of someone or something.
+            </span>
+            <ul>
+              <li>How can the product or service change the trust between the users and the business that owns the
+                system?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+
+            <span>
+              <span class="sample-topics-text">Inclusiveness and Diversity</span>
+              refers to the inclusion of people who might otherwise be excluded or marginalized.
+            </span>
+            <ul>
+              <li>How can the product or service impact on how people perceive others? What effects can it have on
+                users with different backgrounds, age groups, education levels, or other differences?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+
+            <span>
+              <span class="sample-topics-text">Equality</span>
+              means the quality of being fair and impartial.
+            </span>
+            <ul>
+              <li>How can the system make people to be treated differently from each other? (think data analytics or
+                decision support)</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+
+            <span>
+              <span class="sample-topics-text">Participation and Communication</span>
+              refers to imparting or interchanging thoughts, opinions or information by speech, writing, or signs
+            </span>
+            <ul>
+              <li>How can the product or service change the way people create networks?</li>
+              <li>How can the product or service change the way people participate in group work?</li>
+              <li>How can the product or service change the way people support, criticize or argue with others?</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </ng-template>
+
+      <ng-template cdkConnectedOverlay cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+        [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayOrigin]="triggerIndividualOverlay"
+        [cdkConnectedOverlayOpen]="showIndividualInfoOverlay" (detach)="showIndividualInfoOverlay = false"
+        (backdropClick)="showIndividualInfoOverlay = false">
+        <mat-card class="overlay-card">
+          <mat-card-content>
+            <span>
+              <span class="sample-topics-text">Health</span>
+              means the state of a person's mental or physical condition.
+            </span>
+            <ul>
+              <li>How can the product or service improve or worsen a person's physical, mental, and/or emotional
+                health?</li>
+              <li>(For example, can it make a person feel anything good or bad - e.g. (under)valued, (dis)respected,
+                (in)dependent, or coerced?)</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Lifelong learning</span>
+              means the use of learning opportunities throughout people's lives for continuous development.
+            </span>
+            <ul>
+              <li>How can the product or service affect people's competencies?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Privacy</span>
+              means being free from intrusion or disturbance in one's private life.
+            </span>
+            <ul>
+              <li>How can the product or service expose (or help to hide) a person's identity, whereabouts
+                or relations?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Safety</span>
+              means being protected from danger, risk, or injury.
+            </span>
+            <ul>
+              <li>How can the product or service expose (or protect) a person from physical harm? How can it make a
+                person feel more (or less) exposed to harm?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Agency</span>
+              means being protected from danger, risk, or injury.
+            </span>
+            <ul>
+              <li>How can the product or service empower (or prevent) a person from taking an action / decision when
+                necessary?</li>
+              <li>Can those affected by the product or service understand its implications, express concerns or be
+                represented by someone?</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </ng-template>
+
+      <ng-template cdkConnectedOverlay cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+        [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayOrigin]="triggerEnvironmentalOverlay"
+        [cdkConnectedOverlayOpen]="showEnvironmentalInfoOverlay" (detach)="showEnvironmentalInfoOverlay = false"
+        (backdropClick)="showEnvironmentalInfoOverlay = false">
+        <mat-card class="overlay-card">
+          <mat-card-content>
+            <span>
+              <span class="sample-topics-text">Material and Resources</span>
+              includes everything that is needed to produce, deploy, operate, and cease a product or service.
+            </span>
+            <ul>
+              <li>How are materials consumed to produce the product or service?</li>
+              <li>What about to operate the product or service? E.g., requires hardware.</li>
+              <li>How can it change the way people consume material? E.g., encourage to buy more?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Waste & pollution</span>
+              means effects the product or service might have on soil, atmospheric, and water pollution.
+            </span>
+            <ul>
+              <li>How can producing parts or supplies generate waste or emissions?</li>
+              <li>How can the use itself produce waste or emissions?</li>
+              <li>How can it influence how much waste or emissions are generated?</li>
+              <li>How can it promote (or impair) recycling?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Biodiversity</span>
+              includes the effects of a product or service on biodiversity in its operational environment and other
+              affected land.
+            </span>
+            <ul>
+              <li>How can it impact the plants or animals around it? Or elsewhere?</li>
+              <li>How can it change composition of the soil around it? E.g., occupying / cropland?</li>
+              <li>What about elsewhere?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Energy</span>
+              means all energy use that results from producing and using a product or service.
+            </span>
+            <ul>
+              <li>How can the product of service affect the need for production of energy?</li>
+              <li>What about the use of energy? E.g. encourages less energy.</li>
+              <li>Does the hardware run on renewable energy? Is there a way to incentivise that?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Logistics</span>
+              means the effects of the product or service on moving people and/or goods.
+            </span>
+            <ul>
+              <li>How can it affect the need (and distance) for moving people or goods?</li>
+              <li>How can it affect the means by which people or goods move?</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </ng-template>
+
+      <ng-template cdkConnectedOverlay cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+        [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayOrigin]="triggerEconomicalOverlay"
+        [cdkConnectedOverlayOpen]="showEconomicalInfoOverlay" (detach)="showEconomicalInfoOverlay = false"
+        (backdropClick)="showEconomicalInfoOverlay = false">
+        <mat-card class="overlay-card">
+          <mat-card-content>
+            <span>
+              <span class="sample-topics-text">Value</span>
+              means the worth, or usefulness of something, principles or standards; judgement of what is important in
+              life.
+            </span>
+            <ul>
+              <li>How can the product or service create or destroy monetary value? For whom?</li>
+              <li>Are there any other related types of business value? For whom?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Customer Relationship Management</span>
+              steers a company's interaction with current and potential customers to improve business relationships
+              (e.g. retention, growth).
+            </span>
+            <ul>
+              <li>How can the product or service affect the relationship between the business and its customers?</li>
+              <li>How can it enable co-creation or co-destruction of value?</li>
+              <li>How can it impact the financial situation of their customers & others?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Supply Chain</span>
+              means a system of organizations, people, activities, information, and resources involved in moving a
+              product or service from supplier to customer.
+            </span>
+            <ul>
+              <li>How can the product or service affect the supply chain of the business who owns it?</li>
+              <li>How can these changes in supply chain impact the financial situation?</li>
+              <li>How can it impact the financial situation of their customers & others?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Governance</span>
+              means the processes of interaction and decision-making among the actors involved in a system through the
+              laws, norms, power or language of an organized society.
+            </span>
+            <ul>
+              <li>How can the product or service affect how and by whom such decisions are made?</li>
+              <li>How can the product or service affect the communication channels by which the relationships takes
+                place?</li>
+              <li>How can these changes impact the financial situation of the business and partners?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Innovation</span>
+              refers to something new or to a change made to an existing product, idea, or field.
+            </span>
+            <ul>
+              <li>Do (parts of) the product or service affect the investment on research & development?</li>
+              <li>How can changes in innovation and R&D impact the financial situation?</li>
+              <li>Can it also impact the financial situation of their customers & others?</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </ng-template>
+
+      <ng-template cdkConnectedOverlay cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+        [cdkConnectedOverlayHasBackdrop]="true" [cdkConnectedOverlayOrigin]="triggerTechnicalOverlay"
+        [cdkConnectedOverlayOpen]="showTechnicalInfoOverlay" (detach)="showTechnicalInfoOverlay = false"
+        (backdropClick)="showTechnicalInfoOverlay = false">
+        <mat-card class="overlay-card">
+          <mat-card-content>
+            <span>
+              <span class="sample-topics-text">Maintainability</span>
+              means the degree to which an application is understood, repaired, or enhanced.
+            </span>
+            <ul>
+              <li>How are the operating system and runtime environment expected to change what does that required from
+                maintainers of this system?</li>
+              <li>How can the correctness of the system be affected by other systems or affect the correctness of
+                others?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Usability</span>
+              means the ability of users to productively use the system for the intended purpose.
+            </span>
+            <ul>
+              <li>What kind of knowledge or physical properties are required to use the system and how can this affect
+                different types of users? For example, is good eyesight and small, sensitive hands required to operate a
+                system on a small handheld device?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Adaptability</span>
+              means the ability of a system to adapt itself to fit its behaviour according to changes in its environment
+              or in parts of the system itself.
+            </span>
+            <ul>
+              <li>How could someone want to use the system in another context?</li>
+              <li>What can make that easier/more difficult?</li>
+              <li>What can make that easier/more difficult for the system to adapt itself to fit new usage scenarios?
+              </li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Security</span>
+              means freedom from, or resilience against, potential harm (or other unwanted coercive change) caused by
+              external or internal attacks
+            </span>
+            <ul>
+              <li>Which assets controlled by this system would be desirable to an attacker? E.g. financial information,
+                people's whereabouts or preferences, etc.</li>
+              <li>What are the risks associated with these assets?</li>
+              <li>What are other likely vulnerabilities of the system?</li>
+            </ul>
+            <mat-divider class="overlay-divider"></mat-divider>
+            <span>
+              <span class="sample-topics-text">Scalability</span>
+              means the systems ability to handle growing amounts of work in a graceful manner or to be enlarged
+              horizontally or vertically and will continue to function with comparable response times.
+            </span>
+            <ul>
+              <li>How can the system support changes in workload?</li>
+              <li>What can make that easier/more difficult?</li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </ng-template>
+    </div>
+
+    <div *ngIf="isVotingState && submittedVoteId && !submittingVote && !loadingVoteOfCurrentUser" fxLayout="column"
+      fxLayoutAlign="center center" class="board-content">
+      <mat-icon class="icon-display">check_circle_outline</mat-icon>
+      <p class="success-text">Your vote has been submitted!</p>
+    </div>
+  </mat-card-content>
+</mat-card>

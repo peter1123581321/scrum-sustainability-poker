@@ -1,0 +1,10 @@
+<mat-toolbar color="primary" fxLayout="row" style="overflow: auto;">
+  <div fxFlex fxLayoutGap="10px">
+    <span>Scrum Sustainability Poker</span>
+    <span fxFlex></span>
+    <div *ngIf="(isLoggedIn$ | async)" fxLayout="row" fxFlex fxLayoutAlign="end center" fxLayoutGap="5px">
+      <mat-icon>person</mat-icon>
+      <span>{{ user$ | async }}</span>
+    </div>
+  </div>
+</mat-toolbar>

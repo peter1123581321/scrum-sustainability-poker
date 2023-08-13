@@ -1,0 +1,21 @@
+<div style="height: 100%;" fxLayout="column" fxLayoutAlign="center center">
+  <mat-card class="create-room" fxlayout="column">
+    <mat-toolbar color="primary">
+      <mat-icon>input</mat-icon>
+      <span style="padding-left: 10px;">Create new room</span>
+    </mat-toolbar>
+    <div fxLayout="column" fxLayoutAlign="center stretch" style="padding: 24px;">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput type="text" [formControl]="roomNameCtrl" (keyup.enter)="createNewRoom()">
+        <mat-error *ngIf="roomNameCtrl.hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="createNewRoom()" [disabled]="loading || !roomNameCtrl.dirty"
+        [class.button-loading]="loading">
+        <span *ngIf="!loading">Create room</span>
+      </button>
+    </div>
+  </mat-card>
+</div>

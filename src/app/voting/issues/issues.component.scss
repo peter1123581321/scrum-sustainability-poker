@@ -1,0 +1,71 @@
+.sidenav-header-row {
+  padding: 8px 15px 7px 15px;
+}
+
+.sidenav-header-hx {
+  margin-bottom: 0px !important;
+  padding-left: 10px;
+}
+
+.sidenav-content {
+  padding: 10px;
+}
+
+.issue-card {
+  margin: 10px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px 20px;
+}
+
+@media (min-width: 440px) {
+  .issue-card {
+    min-width: 400px;
+    max-width: 400px;
+  }
+
+  .no-data {
+    min-width: 400px;
+    max-width: 400px;
+  }
+}
+
+.vertical-divider {
+  height: 30px;
+}
+
+.fixed-header {
+  height: 64px;
+}
+
+.container::-webkit-scrollbar {
+  display: none;
+}
+
+.container {
+  overflow: auto;
+  height: -o-calc(100vh - 64px); // opera
+  height: -webkit-calc(100vh - 64px); // google, safari
+  height: -moz-calc(100vh - 64px); // firefox
+  height: calc(100vh - 64px);
+  -ms-overflow-style: none; // IE and Edge
+  scrollbar-width: none; // Firefox
+}
+
+.panel-header {
+  padding: 0 20px 0 2px;
+}
+
+.mat-column-median {
+  text-align: center;
+}
+
+.mat-column-notSure {
+  text-align: center;
+}
+
+input[type="file"] {
+  display: none;
+}

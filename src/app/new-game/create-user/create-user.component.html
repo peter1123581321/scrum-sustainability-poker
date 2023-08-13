@@ -1,0 +1,21 @@
+<div style="height: 100%;" fxLayout="column" fxLayoutAlign="center center">
+  <mat-card class="create-user" fxlayout="column">
+    <mat-toolbar color="primary">
+      <mat-icon>person</mat-icon>
+      <span style="padding-left: 10px;">Enter your name</span>
+    </mat-toolbar>
+    <div fxLayout="column" fxLayoutAlign="center stretch" style="padding: 24px;">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput type="text" [formControl]="usernameCtrl" (keyup.enter)="joinRoom()">
+        <mat-error *ngIf="usernameCtrl.hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="joinRoom()" [disabled]="loading || !usernameCtrl.dirty"
+        [class.button-loading]="loading">
+        <span *ngIf="!loading">Join room</span>
+      </button>
+    </div>
+  </mat-card>
+</div>

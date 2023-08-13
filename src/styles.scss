@@ -1,0 +1,63 @@
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+}
+
+.slider-result-counter {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  border: 2px solid #32a1ce;
+  border-radius: 30px;
+  padding: 5px;
+}
+
+.snackbar-text-center {
+  text-align: center;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  bottom: 100%;
+  left: 50%;
+  margin-left: -60px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  // Show the tooltip text when you mouse over the tooltip container
+  visibility: visible;
+}
+
+.tooltip .tooltiptext::after {
+  content: ' ';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+@import 'theme.scss';

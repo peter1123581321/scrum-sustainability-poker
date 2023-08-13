@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow to create and read a room document
+    // without being (anonymously) logged in
+    match /rooms/{roomId} {
+      allow read, create: if true;
+    }
+    
+    // Everything else within the room document can only be
+    // read/written/updated/deleted if the user is logged in
+    match /rooms/{roomId}/{document=**} {
+      allow read, write, update, delete: if request.auth != null;
+    }
+  }
+}

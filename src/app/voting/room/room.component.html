@@ -1,0 +1,40 @@
+<div *ngIf="!checkingRoomId" fxLayout="column" fxFill>
+  <mat-sidenav-container fxFillFlex style="height: 100%" hasBackdrop="false">
+    <mat-sidenav #issueSidenav opened="false" mode="over" position="end" role="region" autoFocus="false"
+      fixedInViewport="true" class="sidenav-content">
+      <app-issues (closeSidenav)="issueSidenav.toggle()"></app-issues>
+    </mat-sidenav>
+    <mat-sidenav-content fxLayout="column" fxFillFlex>
+      <!-- ------------ Regular Content ------------ -->
+      <div>
+        <div fxLayout="column" fxLayoutGap="10px">
+          <div fxFlex fxLayout="row" fxLayoutAlign="start center">
+            <!-- Timer (only shown when started) -->
+            <app-timer fxFlex="25" [roomId]="roomId"></app-timer>
+            <div fxFlex="50" fxLayout="row" fxLayoutAlign="center" style="padding-top: 25px;">
+              <!-- Room name as header -->
+              <div fxFlex style="text-align: center;">
+                <h1 class="room-name">{{ currentRoom?.name }}</h1>
+                <h3 *ngIf="currentIssue && !currentIssue.isDefaultIssue">Currently voting: <span>{{ currentIssue.key }} {{ currentIssue.title }}</span></h3>
+                <h3 *ngIf="currentIssue && currentIssue.isDefaultIssue"><i>Voting without an issue</i></h3>
+              </div>
+            </div>
+            <span fxFlex="25"></span>
+          </div>
+
+          <div fxLayout="row" [fxLayout.lt-md]="'column'" fxLayoutAlign="center" fxLayoutGap="10px">
+            <!-- Voting board -->
+            <div fxFlex="46" [fxFlex.lt-md]="65" [fxFlex.lt-xl]="55">
+              <app-voting-board></app-voting-board>
+            </div>
+
+            <!-- Overview panel -->
+            <div fxFlex="24" [fxFlex.lt-md]="35" [fxFlex.lt-xl]="30">
+              <app-overview (openSidenav)="issueSidenav.toggle()"></app-overview>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

@@ -1,0 +1,144 @@
+<div class="fixed-header">
+  <div fxLayout="row" fxLayoutAlign="start center" class="sidenav-header-row">
+    <mat-icon>description</mat-icon>
+    <h2 class="sidenav-header-hx">
+      <span>Issues</span>
+    </h2>
+    <span fxFlex></span>
+
+    <button mat-icon-button *ngIf="isHost" (click)="fileUpload.click()" aria-label="Import issues"
+      matTooltip="Import issues" matTooltipShowDelay="500">
+      <mat-icon>attach_file</mat-icon>
+    </button>
+    <input #fileUpload type="file" accept=".csv" (change)="onCSVFileSelected($event)" />
+
+    <button mat-icon-button *ngIf="isHost" (click)="openDialogToCreateNewIssue()" aria-label="Create new issue"
+      matTooltip="Create new issue" matTooltipShowDelay="500">
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <mat-divider vertical class="vertical-divider"></mat-divider>
+    <button mat-icon-button (click)="closeSidenavClicked()" aria-label="Close sidenav">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-divider></mat-divider>
+</div>
+<div class="container">
+  <mat-tab-group animationDuration="0ms">
+    <!-- ----------- Open Issues ----------- -->
+    <mat-tab label="Open">
+      <mat-divider></mat-divider>
+      <div *ngIf="openIssues && openIssues.length > 0; else noOpenIssues" fxLayout="column" fxLayoutGap="10px"
+        class="sidenav-content">
+        <mat-card class="issue-card" *ngFor="let issue of openIssues">
+          <mat-card-header>
+            <mat-card-title>{{ issue.title}}</mat-card-title>
+            <mat-card-subtitle>{{ issue.key }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+          </mat-card-content>
+          <mat-card-actions *ngIf="isHost" fxLayout="row">
+            <button mat-button color="primary" (click)="voteIssue(issue)"
+              [disabled]="isVotingState || isLoadingIssues">Vote issue</button>
+            <span fxFlex></span>
+            <button mat-icon-button [matMenuTriggerFor]="issueOptionsMenu" aria-label="Options for issue">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #issueOptionsMenu="matMenu">
+              <button mat-menu-item (click)="openDialogToEditIssue(issue)" [disabled]="isVotingState">
+                <mat-icon>edit</mat-icon>
+                <span>Edit</span>
+              </button>
+              <button mat-menu-item (click)="deleteIssue(issue)" [disabled]="isVotingState">
+                <mat-icon>delete_outline</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+      <ng-template #noOpenIssues>
+        <div class="no-data">
+          <span>No issues created yet.</span>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- ----------- Finished Issues ----------- -->
+    <mat-tab label="Finished">
+      <mat-divider></mat-divider>
+      <div *ngIf="finishedIssues && finishedIssues.length > 0; else noFinishedIssues" fxLayout="column"
+        fxLayoutGap="10px" class="sidenav-content">
+        <mat-card class="issue-card" *ngFor="let finishedIssue of finishedIssues">
+          <mat-card-header>
+            <mat-card-title>{{ finishedIssue.issue.title}}</mat-card-title>
+            <mat-card-subtitle>{{ finishedIssue.issue.key }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-accordion>
+              <mat-expansion-panel class="mat-elevation-z0">
+                <mat-expansion-panel-header class="panel-header">
+                  <mat-panel-title>
+                    <mat-chip color="primary">
+                      <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+                        <mat-icon>people</mat-icon>
+                        <span>{{ finishedIssue.nrOfPlayersVoted }} Player voted</span>
+                      </div>
+                    </mat-chip>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <!--
+                  To defer the initialization of the content until the panel is open (i.e. lazy rendering),
+                  the content needs be provided as an ng-template. Otherwise the content would be rendered,
+                  even if the panel is disabled.
+                 -->
+                <ng-template matExpansionPanelContent>
+                  <div>
+                    <table mat-table [dataSource]="finishedIssue.result ? finishedIssue.result : []">
+                      <ng-container matColumnDef="dimension">
+                        <th mat-header-cell *matHeaderCellDef> Dimension </th>
+                        <td mat-cell *matCellDef="let element">
+                          {{ element.dimension }}
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="median">
+                        <th mat-header-cell *matHeaderCellDef> Median </th>
+                        <td mat-cell *matCellDef="let element">
+                          <mat-chip *ngIf="element.median !== undefined; else noMedian"
+                            [style.background-color]="element.median | valueToColor">
+                            <span>&#x0078;&#x0303; <b>{{ element.median }}</b></span>
+                          </mat-chip>
+                          <ng-template #noMedian>
+                            <span> - </span>
+                          </ng-template>
+                        </td>
+                      </ng-container>
+                      <ng-container matColumnDef="notSure">
+                        <th mat-header-cell *matHeaderCellDef> Not sure </th>
+                        <td mat-cell *matCellDef="let element">
+                          <span *ngIf="element.notSure; else noNotSure">{{ element.notSure }}</span>
+                          <ng-template #noNotSure>
+                            <span> - </span>
+                          </ng-template>
+                        </td>
+                      </ng-container>
+                      <tr mat-header-row *matHeaderRowDef="issueResultDisplayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: issueResultDisplayedColumns;"></tr>
+                    </table>
+                  </div>
+                </ng-template>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <ng-template #noFinishedIssues>
+        <div class="no-data">
+          <span>No issues finished yet.</span>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>

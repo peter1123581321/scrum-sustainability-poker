@@ -1,0 +1,38 @@
+.mat-card {
+  margin-bottom: 15px;
+}
+
+.mat-expansion-panel-header-description {
+  justify-content: space-between;
+  align-items: center;
+}
+
+mat-list-item:not(:last-child) {
+  border-bottom: 1px solid #0000001f;
+}
+
+.no-user-result {
+  text-align: center;
+}
+
+
+/* Change the height for the input invitationLink-Input */
+
+:host ::ng-deep .copy-input > .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+:host ::ng-deep .copy-input > div > div {
+  height: 30px !important;
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+:host ::ng-deep .copy-input > div > div > .mat-mdc-form-field-infix {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
+}
+
+:host ::ng-deep .copy-input > div > div > .mat-mdc-form-field-infix > input {
+  height: 30px !important;
+}

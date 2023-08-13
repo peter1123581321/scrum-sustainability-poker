@@ -1,0 +1,42 @@
+<h1 mat-dialog-title>
+  <span *ngIf="issueDialogData.isNewIssue; else updateHeaderText">
+    Create new issue
+  </span>
+  <ng-template #updateHeaderText>
+    <span>
+      Edit issue
+    </span>
+  </ng-template>
+</h1>
+<div mat-dialog-content fxLayout="column" class="mat-dialog-content">
+  <mat-form-field appearance="fill" fxFlex>
+    <mat-label>Key</mat-label>
+    <input matInput type="text" [formControl]="issueKeyCtrl"
+      (keyup.enter)="issueDialogData.isNewIssue ? createNewIssue() : updateIssue()">
+    <mat-error *ngIf="issueKeyCtrl.hasError('required')">
+      Key is required
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field appearance="fill" fxFlex>
+    <mat-label>Title</mat-label>
+    <input matInput type="text" [formControl]="issueTitleCtrl"
+      (keyup.enter)="issueDialogData.isNewIssue ? createNewIssue() : updateIssue()">
+    <mat-error *ngIf="issueTitleCtrl.hasError('required')">
+      Title is required
+    </mat-error>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions class="mat-dialog-actions">
+  <button mat-flat-button (click)="closeIssueDialog()" [disabled]="loading">Cancel</button>
+  <button mat-flat-button *ngIf="issueDialogData.isNewIssue; else updateButton" color="primary"
+    (click)="createNewIssue()" [disabled]="loading || !issueKeyCtrl.dirty || !issueTitleCtrl.dirty"
+    [class.button-loading]="loading">
+    <span *ngIf="!loading">Create</span>
+  </button>
+  <ng-template #updateButton>
+    <button mat-flat-button color="primary" (click)="updateIssue()"
+      [disabled]="loading || (!issueKeyCtrl.dirty && !issueTitleCtrl.dirty)" [class.button-loading]="loading">
+      <span *ngIf="!loading">Update</span>
+    </button>
+  </ng-template>
+</div>

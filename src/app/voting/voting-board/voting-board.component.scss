@@ -1,0 +1,146 @@
+.custom-slider {
+  padding-bottom: 20px;
+}
+
+.result-custom-slider {
+  padding-bottom: 65px;
+}
+
+.board-content {
+  padding: 16px 30px 0px 30px;
+}
+
+.vertical-divider {
+  height: 60px;
+  margin-top: 20px;
+  margin-left: 10px;
+}
+
+.result-vertical-divider {
+  height: 60px;
+  margin-left: 10px;
+}
+
+.suspend-checkbox {
+  margin-top: 20px;
+}
+
+.not-sure-text {
+  margin-top: 20px;
+  text-align: center;
+  font-style: italic;
+}
+
+.question-mark-icon {
+  vertical-align: bottom;
+}
+
+.dimension-header {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.mat-card {
+  margin-bottom: 15px;
+}
+
+.start-voting {
+  font-size: 20px;
+}
+
+.sample-topics-text {
+  font-weight: 500;
+}
+
+ul {
+  padding-inline-start: 20px !important;
+}
+
+#or-divider {
+  width: 70%;
+  margin: .7em auto;
+  overflow: hidden;
+  text-align: center;
+  font-weight: 300;
+}
+
+#or-divider:before,
+#or-divider:after {
+  content: '';
+  display: inline-block;
+  width: 50%;
+  margin: 0 .5em 0 -55%;
+  vertical-align: middle;
+  border-bottom: 1px solid;
+}
+
+#or-divider:after {
+  margin: 0 -55% 0 .5em;
+}
+
+.button-vertical-divider {
+  height: 40px;
+  margin: 0px 10px !important;
+}
+
+.icon-display {
+  transform: scale(4);
+  margin-top: 40px;
+  color: #5ea659;
+}
+
+.icon-display svg {
+  fill: #5ea659;
+}
+
+.success-text {
+  font-weight: 500;
+  font-size: 18px;
+  margin-top: 40px;
+  color: #5ea659;
+}
+
+.result-slider ::ng-deep > .ngx-slider-ticks > span.ngx-slider-tick.ng-star-inserted {
+  margin-left: 0px !important;
+  cursor: default;
+}
+
+.result-slider ::ng-deep > .ngx-slider-pointer-min {
+  width: 4px;
+  border-radius: 16px;
+  margin-left: 3px;
+  background-color: #32a1ce !important;
+  cursor: default;
+}
+
+.result-slider ::ng-deep > span.ngx-slider-span.ngx-slider-pointer.ngx-slider-pointer-min:after {
+  background: unset;
+}
+
+.result-slider ::ng-deep > .ngx-slider-ticks > .ngx-slider-tick > span.ngx-slider-span.ngx-slider-tick-legend.ng-star-inserted {
+  top: 60px;
+}
+
+.hide-slider-pointer ::ng-deep > .ngx-slider-pointer-min {
+  opacity: 0 !important; // hide slider button for result view when no median has been calculated
+}
+
+div.not-sure-icon {
+  position: relative;
+  text-align: center;
+}
+
+div.not-sure-counter {
+  position: relative;
+  top: 48px;
+}
+
+.overlay-card {
+  max-width: 800px;
+  max-height: 400px;
+  overflow: auto;
+}
+
+.overlay-divider {
+  margin-bottom: 10px;
+}
